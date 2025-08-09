@@ -1,0 +1,7 @@
+PARAMETER,MIN,MAX,GRAIN,EXP,DEFAULT,AUTOMATABLE,NAME,SUFFIX,TOOLTIP,TO_STRING_ARR
+MIX,0,100,0,1,50,1,Mix,%,Dry/Wet Mix,
+ROOM_SIZE,0,100,0,1,50,1,Room Size,%,The size of the room,
+DECAY,0,100,0,1,50,1,Decay Time,%,Reverb tail length,
+DAMPING,0,100,0,1,50,1,Damping,%,The amount of high frequency damping,
+WIDTH,0,100,0,1,50,1,Width,%,The stereo width of the reverb,
+PRE_DELAY,0,500,0,1,0,1,Pre-delay,ms,The delay before the reverb starts,

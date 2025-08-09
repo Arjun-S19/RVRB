@@ -1,0 +1,14 @@
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+build/
+
+.vscode/
+
+*.vst3
+*.component
+
+notarize.sh
+uninstall_rvrb.bat
+ParameterDefines.h

@@ -1,0 +1,102 @@
+name: Build and Test Plugin
+
+on: workflow_dispatch
+
+jobs:
+  build-plugin-macos:
+    runs-on: macos-latest
+    steps:
+      # ============ SETUP ============
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      # ============ BUILD ============
+      - name: Build Plugin
+        run: |
+          bash build.sh -m Release --ci
+
+      # ============ CACHE ============
+      - name: Cache Build VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-macos-vst3
+          path: ./build/Release/EXAMPLE_artefacts/Release/VST3
+
+      - name: Cache Build AU
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-macos-au
+          path: ./build/Release/EXAMPLE_artefacts/Release/AU
+
+  validate-AU-macos:
+    runs-on: macos-latest
+    needs: build-plugin-macos
+    steps:
+      - name: Download AU Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-macos-au
+          path: ./build-au
+
+      - name: Download pluginval
+        run: curl -L "https://github.com/Tracktion/pluginval/releases/latest/download/pluginval_macOS.zip" -o pluginval.zip
+
+      - name: Unzip pluginval
+        run: unzip pluginval.zip
+
+      - name: Install AU Plugin to System Directory
+        run: |
+          sudo mkdir -p /Library/Audio/Plug-Ins/Components
+          sudo cp -R ./build-au/EXAMPLE.component /Library/Audio/Plug-Ins/Components/
+          sudo killall -9 AudioComponentRegistrar || true
+
+      - name: Validate AU Plugin
+        run: ./pluginval.app/Contents/MacOS/pluginval --validate-in-process --strictness-level 10 --output-dir "./bin" "/Library/Audio/Plug-Ins/Components/EXAMPLE.component" || exit 1
+
+  validate-VST3-macos:
+    runs-on: macos-latest
+    needs: build-plugin-macos
+    steps:
+      - name: Download VST3 Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-macos-vst3
+          path: ./build-vst3
+
+      - name: Download pluginval
+        run: curl -L "https://github.com/Tracktion/pluginval/releases/latest/download/pluginval_macOS.zip" -o pluginval.zip
+
+      - name: Unzip pluginval
+        run: unzip pluginval.zip
+
+      - name: Validate VST3 Plugin
+        run: ./pluginval.app/Contents/MacOS/pluginval --validate-in-process --strictness-level 10 --output-dir "./bin" "./build-vst3/EXAMPLE.vst3" || exit 1
+
+  # Validation and build happen in the same run on win, no need to separate em out
+  build-and-validate-windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Build Plugin
+        run: |
+          bash build.sh -m Release --ci
+    
+      # ============ CACHE ============
+      - name: Cache Build VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-windows-vst3
+          path: ./build/Release/EXAMPLE_artefacts/Release/VST3
+
+      # ============ PLUGINVAL TESTING ============
+      - name: Validate with pluginval
+        shell: cmd
+        run: |
+          powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest https://github.com/Tracktion/pluginval/releases/latest/download/pluginval_Windows.zip -OutFile pluginval.zip"
+          powershell -Command "Expand-Archive pluginval.zip -DestinationPath ."
+          pluginval.exe --validate-in-process --strictness-level 10 --output-dir "./bin" ".\build\Release\EXAMPLE_artefacts\Release\VST3\EXAMPLE.vst3"
+          if %ERRORLEVEL% neq 0 exit /b 1
