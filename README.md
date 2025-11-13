@@ -1,10 +1,12 @@
 # RVRB
 
-A reverb audio plugin with real-time visual feedback, comprehensive parameter controls, and preset management.
+A reverb audio plugin with real-time visual feedback, minimal parameter controls, and preset management.
+
+![RVRB](https://arsunol.com/thumbs/rvrb.png)
 
 ## Features
 
-- **Core Parameters**: Mix, Room Size, Decay Time, Damping, Width, Pre-delay
+- **Minimal Parameters**: Mix, Room Size, Decay Time, Damping, Width, Pre-delay
 - **Visual Feedback**: Real-time waveform and spectrogram display
 - **Presets**: Hierarchical preset system (Hall and Plate categories)
 - **Formats**: VST3, AU, Standalone
